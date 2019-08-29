@@ -1,0 +1,13 @@
+author: Dendrobyte
+version: 1.67
+api-version: 1.14
+name: OneInTheChamber
+main: com.oitc.dendrobyte.Main
+description: A custom OITC plugin!
+commands:
+  oitc:
+    usage: /<command>
+    description: General use of the oitc command
+permissions:
+  oitc.admin:
+    description: Allows admin commands to be used

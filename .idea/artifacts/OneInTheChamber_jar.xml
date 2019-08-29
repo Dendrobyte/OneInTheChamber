@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OneInTheChamber:jar">
+    <output-path>F:/Misc Programming/MC TESTING SERVER (1.14.4)/plugins</output-path>
+    <root id="archive" name="OneInTheChamber.jar">
+      <element id="module-output" name="OneInTheChamber" />
+    </root>
+  </artifact>
+</component>
