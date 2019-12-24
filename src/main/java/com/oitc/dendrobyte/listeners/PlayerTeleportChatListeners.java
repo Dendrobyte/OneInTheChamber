@@ -1,5 +1,6 @@
 package com.oitc.dendrobyte.listeners;
 
+import com.oitc.dendrobyte.ArenaGameState;
 import com.oitc.dendrobyte.ArenaManager;
 import com.oitc.dendrobyte.ArenaObject;
 import com.oitc.dendrobyte.Main;
@@ -47,13 +48,30 @@ public class PlayerTeleportChatListeners implements Listener {
 
     // Handle players falling outside of the world, into the void
     @EventHandler
-    public void onPlayerFallIntoVoid(EntityDamageEvent event){
+    public void onPlayerTakeDamage(EntityDamageEvent event){
         if(event.getEntity().getType() != EntityType.PLAYER) return;
         Player player = (Player)event.getEntity();
         if(!am.isInGame(player)) return;
-        if(event.getCause() == EntityDamageEvent.DamageCause.VOID || event.getCause() == EntityDamageEvent.DamageCause.DROWNING) {
+        if(event.getCause() == EntityDamageEvent.DamageCause.VOID) {
+            if(am.getKiller(player) != null){
+                am.eliminatePlayer(player, am.getKiller(player));
+            } else {
+                String voidDeath = ChatColor.GOLD + player.getName() + ChatColor.GRAY + " fell into the void!";
+                if(am.getPlayersArena(player).getState() == ArenaGameState.RUNNING){
+                    am.eliminatePlayer(player, voidDeath);
+                } else {
+                    am.spawnPlayer(player, am.getPlayersArena(player));
+                    player.getInventory().clear();
+                }
+            }
+
+        }
+        else if(event.getCause() == EntityDamageEvent.DamageCause.FALL){
             event.setCancelled(true);
-            am.spawnPlayer(player, am.getPlayersArena(player));
+        }
+        else if (event.getCause() == EntityDamageEvent.DamageCause.DROWNING){
+            String drownedDeath = ChatColor.GOLD + player.getName() + " decided to sleep with the fishes!";
+            am.eliminatePlayer(player, drownedDeath);
         }
     }
 
@@ -70,7 +88,7 @@ public class PlayerTeleportChatListeners implements Listener {
         }
         else {
             event.setCancelled(true);
-            player.sendMessage(prefix + "Commands aren't allowed!" + ChatColor.RED + " Use " + ChatColor.BOLD + "/oitc leave " + ChatColor.RED + "to leave");
+            player.sendMessage(prefix + "Commands aren't allowed!" + ChatColor.RED + " Use" + ChatColor.BOLD + " /oitc leave " + ChatColor.RED + "to leave");
         }
     }
 
@@ -85,6 +103,10 @@ public class PlayerTeleportChatListeners implements Listener {
                 }
             }
         } else if(am.isInGame(player)){
+            if(event.getMessage().charAt(0) == '*') {
+                event.setMessage(event.getMessage().substring(1));
+                return;
+            }
             event.setCancelled(true);
             ArenaObject arena = am.getPlayersArena(player);
             for(Player playerInGame : arena.getPlayers()){

@@ -25,7 +25,7 @@ public class PlayerHitListener implements Listener {
 
     // Player contact
     @EventHandler
-    public void onPlayerHit(EntityDamageByEntityEvent event){
+    public void onPlayerHit(EntityDamageByEntityEvent event) {
         if(!(event.getEntity() instanceof Player)) return;
         Player player = (Player)event.getEntity();
         if(!am.isInGame(player)) return;
@@ -36,11 +36,15 @@ public class PlayerHitListener implements Listener {
             double playerHealth = player.getHealth();
             if(playerHealth <= damage){
                 event.setCancelled(true);
+                event.setDamage(0);
                 am.eliminatePlayer(player, damager);
+            } else {
+                // If it's not enough to kill, store the hit
+                am.addHit(player, damager);
             }
         }
         // Player is hit with an arrow
-        if(event.getDamager() instanceof Arrow){
+        if(event.getDamager() instanceof Arrow) {
             Arrow arrow = (Arrow)event.getDamager();
             if(!(arrow.getShooter() instanceof Player)) return;
             Player shooter = (Player)arrow.getShooter();
@@ -59,6 +63,7 @@ public class PlayerHitListener implements Listener {
     public void onArrowLand(ProjectileHitEvent event){
         if(!(event.getEntity() instanceof Arrow)) return;
         Arrow arrow = (Arrow)event.getEntity();
+        if(!(arrow.getShooter() instanceof Player)) return;
         Player shooter = (Player)arrow.getShooter();
         if(!am.isInGame(shooter)) return;
         if(event.getHitBlock() != null){

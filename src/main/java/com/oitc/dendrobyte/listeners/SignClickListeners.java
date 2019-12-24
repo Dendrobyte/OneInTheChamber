@@ -44,6 +44,10 @@ public class SignClickListeners implements Listener {
             player.sendMessage(prefix + ChatColor.RED + "That arena doesn't appear to exist/isn't working.");
             return;
         }
+        if(am.getLobbyLocation() == null){
+            player.sendMessage(prefix + ChatColor.RED + "No lobby location is set! Contact an administrator.");
+            return;
+        }
         ArenaObject workingArena = am.getArenaFromName(line2);
         if(workingArena.getState() == ArenaGameState.WAITING){
             am.addPlayerToGame(workingArena, player);

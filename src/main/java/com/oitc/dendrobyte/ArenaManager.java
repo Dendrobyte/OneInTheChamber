@@ -68,7 +68,7 @@ public class ArenaManager {
         }
     }
 
-    private Location getLobbyLocation(){
+    public Location getLobbyLocation(){
         FileConfiguration config = Main.getInstance().getConfig();
         return new Location(Bukkit.getWorld(Objects.requireNonNull(config.getString("lobby.world"))), config.getInt("lobby.x"),
                 config.getInt("lobby.y"), config.getInt("lobby.z"));
@@ -123,9 +123,13 @@ public class ArenaManager {
         sign.update();
 
         player.sendMessage(prefix + ChatColor.GREEN + "Added to " + arena.getName() + "!");
-        player.sendMessage(prefix + "There are " + ChatColor.DARK_PURPLE + arena.getAst().getSeconds() + ChatColor.GRAY + " seconds remaining.");
         if(currentPlayers == 1){
             player.sendMessage(prefix + ChatColor.ITALIC + "Waiting for at least one more player...");
+            if(arena.getAst() != null){
+                arena.getAst().cancel();
+                player.sendMessage(prefix + ChatColor.RED + "An existing timer for this arena has been canceled.");
+            }
+
         }
 
         if(currentPlayers == 2){
@@ -139,6 +143,11 @@ public class ArenaManager {
                 playerInGame.sendMessage(prefix + "2 players joined! Game starting in 60 seconds!");
             }
         }
+
+        else if(currentPlayers == 3 || currentPlayers >= 5){
+            player.sendMessage(prefix + "There are " + ChatColor.DARK_PURPLE + arena.getAst().getSeconds() + ChatColor.GRAY + " seconds remaining.");
+        }
+
         else if(currentPlayers == 4){
             // Set timer to 15
             ArenaStartingTimer ast = arena.getAst();
@@ -182,7 +191,6 @@ public class ArenaManager {
                 endGame(currentArena, currentArena.getPlayers().get(0));
             }
         }
-
         player.sendMessage(prefix + "You have left the game.");
     }
 
@@ -196,7 +204,7 @@ public class ArenaManager {
         }
 
         // Start timer
-        ArenaRunningTimer art = new ArenaRunningTimer(10, arena);
+        ArenaRunningTimer art = new ArenaRunningTimer(15, arena);
         art.runTaskTimer(Main.getInstance(), 0L, 60*20L); // Go every minute
         arena.setArenaRunningTimer(art);
 
@@ -211,15 +219,29 @@ public class ArenaManager {
     }
 
     public void endGame(ArenaObject arena, Player winner){
+        // Get who has the most deaths
+        Player playerWithMostDeaths = arena.getPlayers().get(0);
+        int mostDeaths = 0;
+
+        for(Player player1 : arena.getPlayers()) {
+            if(arena.getPlayerDeaths().get(player1) > mostDeaths) {
+                mostDeaths = arena.getPlayerDeaths().get(player1);
+                playerWithMostDeaths = player1;
+            }
+        }
+
         // Remove the players
         for(Player playerInGame : arena.getPlayers()){
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
-                    + ChatColor.GRAY + " The winner, with " + killsToWin + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!");
+                    + ChatColor.GRAY + " The winner, with " + killsToWin + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!"
+                    + ChatColor.GRAY + "The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
             removePlayerFromGame(playerInGame, arena);
+            lastHits.remove(playerInGame);
         }
 
         // Reset the arena settings
-        arena.getArt().cancel(); // Just in case this is like 1 or 2 seconds away from finishing or something
+        arena.getArt().cancel();
+        arena.setArenaRunningTimer(null);
         resetArenaSettings(arena);
     }
 
@@ -231,7 +253,6 @@ public class ArenaManager {
                     + ChatColor.DARK_PURPLE + ChatColor.ITALIC + " Time ran out!");
             removePlayerFromGame(playerInGame, arena);
         }
-
         // Reset the arena settings
         resetArenaSettings(arena);
     }
@@ -270,7 +291,7 @@ public class ArenaManager {
             playerInGame.sendMessage(prefix + ChatColor.GOLD + player.getName() +
                     ChatColor.GRAY + " has been " + ChatColor.DARK_RED + "eliminated" +
                     ChatColor.GRAY + " by " + ChatColor.GOLD + shooter.getName() + ChatColor.GRAY + ", " +
-                    "now with " + currentArena.getPlayerElims().get(shooter) + " eliminations!");
+                    "now with " + ChatColor.GREEN + ChatColor.BOLD + currentArena.getPlayerElims().get(shooter) + ChatColor.GRAY + " eliminations!");
         }
 
         shooter.sendMessage(prefix + ChatColor.GOLD + ChatColor.ITALIC + "Nice Shot!" + ChatColor.GREEN + ChatColor.ITALIC + " Total Elims: " + ChatColor.GRAY + currentArena.getPlayerElims().get(shooter));
@@ -283,6 +304,33 @@ public class ArenaManager {
             endGame(getPlayersArena(player), shooter);
         }
 
+    }
+
+    public void eliminatePlayer(Player player, String reason) {
+        ArenaObject currentArena = playerArenas.get(player);
+        // Respawn player and reset inventory
+        spawnPlayer(player, playerArenas.get(player));
+        givePlayerItems(player);
+
+        // Announcement and elim/death tally
+        int deaths = currentArena.incrementPlayerDeaths(player);
+
+        for (Player playerInGame : currentArena.getPlayers()) {
+            playerInGame.sendMessage(prefix + reason);
+        }
+
+        player.sendMessage(prefix + ChatColor.RED + ChatColor.ITALIC + "Total Deaths: " + ChatColor.GRAY + deaths);
+
+        // Increment elims and win condition check if there is a player registered as the killer
+        if (lastHits.get(player) != null) {
+            int elims = currentArena.incrementPlayerElims(lastHits.get(player));
+
+            if (elims >= killsToWin) {
+                endGame(getPlayersArena(player), lastHits.get(player));
+            }
+
+            lastHits.remove(player);
+        }
     }
 
     public void spawnPlayer(Player player, ArenaObject arena){
@@ -303,7 +351,6 @@ public class ArenaManager {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -400,5 +447,17 @@ public class ArenaManager {
 
     public void setPlayerCreationState(Player player, CreationStates state){
         playerCreationStates.put(player, state);
+    }
+
+    // Some methods for storing player damage to get a kill by knocking someone off
+
+    private HashMap<Player, Player> lastHits = new HashMap<>();
+
+    public void addHit(Player defender, Player attacker){
+        lastHits.put(defender, attacker);
+    }
+
+    public Player getKiller(Player defender){
+        return lastHits.get(defender);
     }
 }

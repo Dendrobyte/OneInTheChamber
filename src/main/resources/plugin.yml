@@ -1,9 +1,10 @@
 author: Dendrobyte
-version: 1.67
+version: 2.0
 api-version: 1.14
 name: OneInTheChamber
 main: com.oitc.dendrobyte.Main
 description: A custom OITC plugin!
+softdepend: [Multiverse-Core]
 commands:
   oitc:
     usage: /<command>
