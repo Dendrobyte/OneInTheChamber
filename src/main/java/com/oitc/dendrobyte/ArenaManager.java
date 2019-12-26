@@ -110,9 +110,8 @@ public class ArenaManager {
         player.setGameMode(GameMode.SURVIVAL);
 
         // Add player to the arena list
-        int currentPlayers = arena.getPlayers().size();
-        currentPlayers +=1 ;
         arena.getPlayers().add(player);
+        int currentPlayers = arena.getPlayers().size();
         playerArenas.put(player, arena);
         playersInGames.add(player);
 
@@ -162,13 +161,15 @@ public class ArenaManager {
 
     public void removePlayerFromGame(Player player, ArenaObject arena){
         // Remove the player from the game
+        arena.getPlayers().remove(player);
         playerArenas.remove(player);
         playersInGames.remove(player);
 
         // Edit the sign player amount (i = 2)
         Sign arenaSign = (Sign)arena.getSignLoc().getBlock().getState();
-        int curr = Integer.parseInt(arenaSign.getLine(2).substring(0, arenaSign.getLine(2).indexOf("/")));
-        arenaSign.setLine(2, curr-1 + "/10");
+        int curr = arena.getPlayers().size();
+        arenaSign.setLine(2, curr + "/10");
+        arenaSign.update();
 
         // Teleport them back to world spawn location
         player.getInventory().clear();
@@ -234,7 +235,11 @@ public class ArenaManager {
         for(Player playerInGame : arena.getPlayers()){
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
                     + ChatColor.GRAY + " The winner, with " + killsToWin + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!"
-                    + ChatColor.GRAY + "The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
+                    + ChatColor.GRAY + " The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
+
+            playerInGame.sendMessage(prefix + ChatColor.GRAY + "You had " + ChatColor.GREEN + arena.getPlayerElims().get(playerInGame) + " eliminations," +
+                    ChatColor.GRAY + " and " + ChatColor.RED + arena.getPlayerDeaths() + " kills" + ChatColor.GRAY + ".");
+
             removePlayerFromGame(playerInGame, arena);
             lastHits.remove(playerInGame);
         }
@@ -343,6 +348,7 @@ public class ArenaManager {
         Location spawnLoc = arena.getSpawnLocations().get(spawnLocIndex);
         player.teleport(spawnLoc);
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*3, 20));
+        player.setSaturation(0);
     }
 
     public boolean arenaExists(String arenaName){

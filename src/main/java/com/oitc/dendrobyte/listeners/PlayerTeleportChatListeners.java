@@ -80,13 +80,10 @@ public class PlayerTeleportChatListeners implements Listener {
     public void onPlayerUseCommand(PlayerCommandPreprocessEvent event){
         Player player = event.getPlayer();
         String message = event.getMessage();
-        if(!am.isInGame(player)){
+        if(!am.isInGame(player) || message.length() < 5){
             return;
         }
-        if(message.substring(1, 5).equalsIgnoreCase("oitc")){
-            return;
-        }
-        else {
+        if(!message.substring(1, 5).equalsIgnoreCase("oitc")){
             event.setCancelled(true);
             player.sendMessage(prefix + "Commands aren't allowed!" + ChatColor.RED + " Use" + ChatColor.BOLD + " /oitc leave " + ChatColor.RED + "to leave");
         }
