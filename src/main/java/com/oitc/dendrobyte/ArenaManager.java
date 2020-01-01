@@ -108,6 +108,7 @@ public class ArenaManager {
         player.teleport(arena.getRandomSpawnLocation());
         player.getInventory().clear();
         player.setGameMode(GameMode.SURVIVAL);
+        player.setSaturation(0);
 
         // Add player to the arena list
         arena.getPlayers().add(player);
@@ -200,7 +201,6 @@ public class ArenaManager {
         for(Player player : arena.getPlayers()){
             givePlayerItems(player);
             player.teleport(arena.getRandomSpawnLocation());
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 999999999, 666));
             player.sendMessage(prefix + "Items added to inventory, and teleported to a new spawnpoint!");
         }
 
@@ -232,13 +232,15 @@ public class ArenaManager {
         }
 
         // Remove the players
-        for(Player playerInGame : arena.getPlayers()){
+        ArrayList<Player> tempPlayersInGame = arena.getPlayers(); // Avoid concurrent modification exception
+        for(Player playerInGame : tempPlayersInGame){
+            if(playerInGame == null) continue;
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
                     + ChatColor.GRAY + " The winner, with " + killsToWin + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!"
                     + ChatColor.GRAY + " The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
 
             playerInGame.sendMessage(prefix + ChatColor.GRAY + "You had " + ChatColor.GREEN + arena.getPlayerElims().get(playerInGame) + " eliminations," +
-                    ChatColor.GRAY + " and " + ChatColor.RED + arena.getPlayerDeaths() + " kills" + ChatColor.GRAY + ".");
+                    ChatColor.GRAY + " and " + ChatColor.RED + arena.getPlayerDeaths().get(playerInGame) + " kills" + ChatColor.GRAY + ".");
 
             removePlayerFromGame(playerInGame, arena);
             lastHits.remove(playerInGame);
@@ -348,7 +350,7 @@ public class ArenaManager {
         Location spawnLoc = arena.getSpawnLocations().get(spawnLocIndex);
         player.teleport(spawnLoc);
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*3, 20));
-        player.setSaturation(0);
+        player.setFoodLevel(100);
     }
 
     public boolean arenaExists(String arenaName){
