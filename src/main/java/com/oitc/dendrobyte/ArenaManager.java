@@ -5,6 +5,7 @@ import com.oitc.dendrobyte.creation.CreationStates;
 import com.oitc.dendrobyte.timers.ArenaRunningTimer;
 import com.oitc.dendrobyte.timers.ArenaStartingTimer;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -109,6 +110,7 @@ public class ArenaManager {
         player.getInventory().clear();
         player.setGameMode(GameMode.SURVIVAL);
         player.setSaturation(0);
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(16.0D);
 
         // Add player to the arena list
         arena.getPlayers().add(player);
@@ -178,6 +180,7 @@ public class ArenaManager {
             player.removePotionEffect(effect.getType());
         }
         player.teleport(getLobbyLocation());
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4.0D);
         player.sendMessage(prefix + "Thanks for playing!");
     }
 
