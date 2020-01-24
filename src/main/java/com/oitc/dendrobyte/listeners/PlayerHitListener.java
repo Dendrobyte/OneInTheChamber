@@ -2,6 +2,7 @@ package com.oitc.dendrobyte.listeners;
 
 import com.oitc.dendrobyte.ArenaManager;
 import com.oitc.dendrobyte.Main;
+import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -38,6 +39,8 @@ public class PlayerHitListener implements Listener {
                 event.setCancelled(true);
                 event.setDamage(0);
                 am.eliminatePlayer(player, damager);
+                player.playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 5, 1);
+                damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 5, 1);
             } else {
                 // If it's not enough to kill, store the hit
                 am.addHit(player, damager);

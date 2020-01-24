@@ -15,10 +15,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -153,7 +150,7 @@ public class ArenaManager {
         else if(currentPlayers == 4){
             // Set timer to 15
             ArenaStartingTimer ast = arena.getAst();
-            ast.setSeconds(15);
+            if(ast.getSeconds() > 15) ast.setSeconds(15);
 
             // Tell everyone
             for(Player playerInGame : arena.getPlayers()){
@@ -234,8 +231,11 @@ public class ArenaManager {
             }
         }
 
+        // Avoid concurrent modification exception
+        ArrayList<Player> tempPlayersInGame = new ArrayList<>(4);
+        tempPlayersInGame.addAll(arena.getPlayers());
+
         // Remove the players
-        ArrayList<Player> tempPlayersInGame = arena.getPlayers(); // Avoid concurrent modification exception
         for(Player playerInGame : tempPlayersInGame){
             if(playerInGame == null) continue;
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
