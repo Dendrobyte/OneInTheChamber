@@ -2,6 +2,7 @@ package com.oitc.dendrobyte;
 
 import com.oitc.dendrobyte.creation.ArenaCreationObject;
 import com.oitc.dendrobyte.creation.CreationStates;
+import com.oitc.dendrobyte.leaderboards.LeaderboardManager;
 import com.oitc.dendrobyte.timers.ArenaRunningTimer;
 import com.oitc.dendrobyte.timers.ArenaStartingTimer;
 import org.bukkit.*;
@@ -79,7 +80,7 @@ public class ArenaManager {
     }
 
     public int maxPlayers = 10; // No needed players. Will start 60 seconds after 2 people join, and skip to 20 seconds after 4 people join
-    int killsToWin = 20;
+    int killsToWin = 4;
 
     ArrayList<Player> playersInGames = new ArrayList<>();
     public boolean isInGame(Player player){
@@ -201,6 +202,8 @@ public class ArenaManager {
         for(Player player : arena.getPlayers()){
             givePlayerItems(player);
             player.teleport(arena.getRandomSpawnLocation());
+            arena.getPlayerElims().put(player, 0);
+            arena.getPlayerDeaths().put(player, 0);
             player.sendMessage(prefix + "Items added to inventory, and teleported to a new spawnpoint!");
         }
 
@@ -224,17 +227,23 @@ public class ArenaManager {
         Player playerWithMostDeaths = arena.getPlayers().get(0);
         int mostDeaths = 0;
 
-        for(Player player1 : arena.getPlayers()) {
-            if(arena.getPlayerDeaths().get(player1) > mostDeaths) {
-                mostDeaths = arena.getPlayerDeaths().get(player1);
-                playerWithMostDeaths = player1;
+        try {
+            for (Player player1 : arena.getPlayers()) {
+                if (arena.getPlayerDeaths().get(player1) > mostDeaths) {
+                    mostDeaths = arena.getPlayerDeaths().get(player1);
+                    playerWithMostDeaths = player1;
+                }
             }
+        } catch (NullPointerException e){
+            // If someone leaves and no one dies, well...
         }
 
         // Avoid concurrent modification exception
         ArrayList<Player> tempPlayersInGame = new ArrayList<>(4);
         tempPlayersInGame.addAll(arena.getPlayers());
 
+        // Update leaderboards
+        LeaderboardManager.getInstance().updateGroupStandings(arena, winner);
         // Remove the players
         for(Player playerInGame : tempPlayersInGame){
             if(playerInGame == null) continue;
@@ -243,7 +252,7 @@ public class ArenaManager {
                     + ChatColor.GRAY + " The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
 
             playerInGame.sendMessage(prefix + ChatColor.GRAY + "You had " + ChatColor.GREEN + arena.getPlayerElims().get(playerInGame) + " eliminations," +
-                    ChatColor.GRAY + " and " + ChatColor.RED + arena.getPlayerDeaths().get(playerInGame) + " kills" + ChatColor.GRAY + ".");
+                    ChatColor.GRAY + " and " + ChatColor.RED + arena.getPlayerDeaths().get(playerInGame) + " deaths" + ChatColor.GRAY + ".");
 
             removePlayerFromGame(playerInGame, arena);
             lastHits.remove(playerInGame);
@@ -260,7 +269,7 @@ public class ArenaManager {
         // Remove the players
         for(Player playerInGame : arena.getPlayers()){
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
-                    + ChatColor.DARK_PURPLE + ChatColor.ITALIC + " Time ran out!");
+                    + ChatColor.DARK_PURPLE + ChatColor.ITALIC + " Time ran out! [No leaderboard stats were updated]");
             removePlayerFromGame(playerInGame, arena);
         }
         // Reset the arena settings

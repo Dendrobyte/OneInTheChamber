@@ -1,5 +1,6 @@
 package com.oitc.dendrobyte;
 
+import com.oitc.dendrobyte.leaderboards.LeaderboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -37,6 +38,7 @@ public class BaseCommand implements CommandExecutor {
                 player.sendMessage(purple + "/oitc stoptimer" + gray + " - Stop arena timer of arena you are in ");
                 player.sendMessage(purple + "/oitc forcestart" + gray + " - Force start arena you are in");
                 player.sendMessage(purple + "/oitc forcestop <player>" + gray + " - Force stop a game with <player> in it");
+                player.sendMessage(purple + "/oitc stats" + gray + " - Show the current OITC leaderboards");
                 return true;
             }
             if(args[0].equalsIgnoreCase("leave")){
@@ -110,6 +112,10 @@ public class BaseCommand implements CommandExecutor {
                 // Otherwise, stop the game
                 ArenaObject currentArena = am.getPlayersArena(inGame);
                 am.forcestopArena(currentArena, player);
+            }
+            if(args[0].equalsIgnoreCase("stats")){
+                LeaderboardManager.getInstance().sendAllStandings(player);
+                return true;
             }
         }
         return true;

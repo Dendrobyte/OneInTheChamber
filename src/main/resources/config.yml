@@ -1,0 +1,26 @@
+arenas:
+  test:
+    world: fourfac
+    signLoc:
+      x: -113.0
+      y: 70.0
+      z: 23.0
+    spawnpoints:
+      - -114;72=24
+      - -121;72=23
+      - -123;72=29
+      - -127;72=23
+  boop:
+    world: fourfac
+    signLoc:
+      x: -141.0
+      y: 70.0
+      z: 25.0
+    spawnpoints:
+      - -147;71=22
+      - -150;71=25
+lobby:
+  world: fourfac
+  x: -143
+  y: 70
+  z: 23
