@@ -24,3 +24,6 @@ lobby:
   x: -143
   y: 70
   z: 23
+
+max-players: 10
+kills-to-win: 20

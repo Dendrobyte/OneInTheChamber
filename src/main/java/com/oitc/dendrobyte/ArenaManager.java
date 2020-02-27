@@ -10,8 +10,10 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -79,8 +81,8 @@ public class ArenaManager {
         loadArenas();
     }
 
-    public int maxPlayers = 10; // No needed players. Will start 60 seconds after 2 people join, and skip to 20 seconds after 4 people join
-    int killsToWin = 4;
+    public int maxPlayers = Main.getInstance().getConfig().getInt("max-players"); // No needed players. Will start 60 seconds after 2 people join, and skip to 20 seconds after 4 people join
+    int killsToWin = Main.getInstance().getConfig().getInt("kills-to-win");
 
     ArrayList<Player> playersInGames = new ArrayList<>();
     public boolean isInGame(Player player){
@@ -99,6 +101,20 @@ public class ArenaManager {
         player.getInventory().addItem(new ItemStack(Material.STONE_SWORD, 1));
         player.getInventory().addItem(new ItemStack(Material.BOW, 1));
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
+        ArenaObject playerArena = getPlayersArena(player);
+        if(playerArena.getArt().getMinutes() < 5){
+            int minElims = Collections.min(playerArena.getPlayerElims().values());
+            if(playerArena.getPlayerElims().get(player) == minElims){
+                ItemStack slapFish = new ItemStack(Material.PUFFERFISH, 1);
+                ItemMeta slapFishMeta = slapFish.getItemMeta();
+                slapFishMeta.setDisplayName("" + ChatColor.YELLOW + ChatColor.BOLD + "SLAPUFFER FISH");
+                slapFishMeta.addEnchant(Enchantment.KNOCKBACK, 20, true);
+                slapFish.setItemMeta(slapFishMeta);
+
+                player.getInventory().addItem(slapFish);
+                player.sendMessage(prefix + "Looks like you might need an extra hand... or fin!");
+            }
+        }
 
     }
 

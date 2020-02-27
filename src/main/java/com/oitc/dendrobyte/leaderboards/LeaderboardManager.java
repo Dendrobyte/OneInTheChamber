@@ -101,7 +101,7 @@ public class LeaderboardManager {
         return result;
     }
 
-    // Retreive a specific player's standings
+    // Retrieve a specific player's standings
     public CompetitorObject getSpecificPlayerStandings(String name) {
         for(CompetitorObject object : parseConfigData()){
             if(object.getUsername().equalsIgnoreCase(name)) {
@@ -117,8 +117,7 @@ public class LeaderboardManager {
     }
 
     public void sendAllStandings(Player playerToMessage){
-        playerToMessage.sendMessage("" + ChatColor.DARK_GRAY + "-+ " + ChatColor.DARK_PURPLE + "OITC Leaderboard" + ChatColor.DARK_GRAY + " +-");
-        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_PURPLE + "Most Wins"));
+        // Calculations
         int i = 1;
         StringBuilder mostWins = new StringBuilder();
         for(CompetitorObject winner : sortByCategory("wins")){
@@ -127,9 +126,6 @@ public class LeaderboardManager {
                     .append(winner.getWins()).append("\n");
             i++;
         }
-        playerToMessage.sendMessage(mostWins.toString());
-
-        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_GREEN + "Most Eliminations"));
         i = 1;
         StringBuilder mostElims = new StringBuilder();
         for(CompetitorObject elims : sortByCategory("elims")){
@@ -138,17 +134,24 @@ public class LeaderboardManager {
                     .append(elims.getEliminations()).append("\n");
             i++;
         }
-        playerToMessage.sendMessage(mostElims.toString());
-
-        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_RED + "Most Deaths"));
         i = 1;
         StringBuilder mostDeaths = new StringBuilder();
-        for(CompetitorObject deaths : sortByCategory("elims")){
+        for(CompetitorObject deaths : sortByCategory("deaths")){
             if(deaths == null) break;
             mostDeaths.append("" + ChatColor.GRAY).append(i).append(". ").append(ChatColor.RED).append(deaths.getUsername()).append(" - ")
                     .append(deaths.getDeaths()).append("\n");
             i++;
         }
+
+        // Send the leaderboard
+        playerToMessage.sendMessage("" + ChatColor.DARK_GRAY + "-+ " + ChatColor.DARK_PURPLE + "OITC Leaderboard" + ChatColor.DARK_GRAY + " +-");
+        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_PURPLE + "Most Wins"));
+        playerToMessage.sendMessage(mostWins.toString());
+
+        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_GREEN + "Most Eliminations"));
+        playerToMessage.sendMessage(mostElims.toString());
+
+        playerToMessage.sendMessage(getLeaderboardsTitle("" + ChatColor.DARK_RED + "Most Deaths"));
         playerToMessage.sendMessage(mostDeaths.toString());
 
         String playerName = playerToMessage.getName();
@@ -205,8 +208,11 @@ public class LeaderboardManager {
 
     // Update the standings of all players in a game
     public void updateGroupStandings(ArenaObject arena, Player victor){
+        if(arena.getPlayers().size() < 3){
+            arena.getPlayers().forEach(player -> player.sendMessage("" + ChatColor.GRAY + ChatColor.ITALIC + "Leaderboard stats were not updated since this was a two player game."));
+            return;
+        }
         for(Player player : arena.getPlayers()){
-            System.out.println("Arena loop: " + player);
             int elims = arena.getPlayerElims().get(player);
             int deaths = arena.getPlayerDeaths().get(player);
             if(player.equals(victor)){

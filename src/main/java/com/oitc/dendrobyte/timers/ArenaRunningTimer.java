@@ -27,6 +27,10 @@ public class ArenaRunningTimer extends BukkitRunnable {
         this.arena = arena;
     }
 
+    public int getMinutes(){
+        return minutes;
+    }
+
     @Override
     public void run() {
         if(minutes == 0){

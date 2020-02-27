@@ -50,7 +50,11 @@ public class BaseCommand implements CommandExecutor {
                 for(int i = 1; i < args.length ; i++){
                     temp += args[i] + " ";
                 }
-                Bukkit.broadcastMessage(prefix + ChatColor.DARK_GRAY + " " + player.getName() + " " + ChatColor.GOLD + ">> " + ChatColor.GRAY + temp);
+                Bukkit.broadcastMessage(prefix + ChatColor.DARK_GRAY + player.getName() + " " + ChatColor.GOLD + ">> " + ChatColor.GRAY + temp);
+            }
+            if(args[0].equalsIgnoreCase("stats")){
+                LeaderboardManager.getInstance().sendAllStandings(player);
+                return true;
             }
             else if(!(player.hasPermission("oitc.admin"))){
                 player.sendMessage(prefix + ChatColor.RED + "Only admins can use the other OITC commands.\n" +
@@ -112,10 +116,6 @@ public class BaseCommand implements CommandExecutor {
                 // Otherwise, stop the game
                 ArenaObject currentArena = am.getPlayersArena(inGame);
                 am.forcestopArena(currentArena, player);
-            }
-            if(args[0].equalsIgnoreCase("stats")){
-                LeaderboardManager.getInstance().sendAllStandings(player);
-                return true;
             }
         }
         return true;
