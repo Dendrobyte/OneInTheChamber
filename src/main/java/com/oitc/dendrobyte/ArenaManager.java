@@ -102,6 +102,7 @@ public class ArenaManager {
         player.getInventory().addItem(new ItemStack(Material.BOW, 1));
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
         ArenaObject playerArena = getPlayersArena(player);
+        if(playerArena.getState() == ArenaGameState.WAITING) return;
         if(playerArena.getArt().getMinutes() < 5){
             int minElims = Collections.min(playerArena.getPlayerElims().values());
             if(playerArena.getPlayerElims().get(player) == minElims){
@@ -214,6 +215,12 @@ public class ArenaManager {
     }
 
     public void startGame(ArenaObject arena){
+
+        // Start timer
+        ArenaRunningTimer art = new ArenaRunningTimer(15, arena);
+        art.runTaskTimer(Main.getInstance(), 0L, 60*20L); // Go every minute
+        arena.setArenaRunningTimer(art);
+
         // Give all the players the proper items and teleport them to locations
         for(Player player : arena.getPlayers()){
             givePlayerItems(player);
@@ -222,11 +229,6 @@ public class ArenaManager {
             arena.getPlayerDeaths().put(player, 0);
             player.sendMessage(prefix + "Items added to inventory, and teleported to a new spawnpoint!");
         }
-
-        // Start timer
-        ArenaRunningTimer art = new ArenaRunningTimer(15, arena);
-        art.runTaskTimer(Main.getInstance(), 0L, 60*20L); // Go every minute
-        arena.setArenaRunningTimer(art);
 
         // Set the state, send messages, update sign
         arena.setState(ArenaGameState.RUNNING);

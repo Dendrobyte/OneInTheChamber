@@ -39,7 +39,7 @@ public class PlayerHitListener implements Listener {
                 event.setCancelled(true);
                 event.setDamage(0);
                 am.eliminatePlayer(player, damager);
-                player.playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 5, 1);
+                player.playSound(player.getLocation(), Sound.ENTITY_PIG_HURT, 2, 1);
                 damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 5, 1);
             } else {
                 // If it's not enough to kill, store the hit
