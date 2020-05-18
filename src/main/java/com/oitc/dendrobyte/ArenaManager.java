@@ -97,11 +97,16 @@ public class ArenaManager {
 
     // Also used to reset inventory items
     public void givePlayerItems(Player player){
+        ArenaObject playerArena = getPlayersArena(player);
+
+        // I think this should work should someone find a way to get out of the world, i.e. the damage killing bug
+        if(!player.getWorld().getName().equalsIgnoreCase(playerArena.getSpawnLocations().get(0).getWorld().getName())){
+            player.teleport(playerArena.getRandomSpawnLocation());
+        }
         player.getInventory().clear();
         player.getInventory().addItem(new ItemStack(Material.STONE_SWORD, 1));
         player.getInventory().addItem(new ItemStack(Material.BOW, 1));
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
-        ArenaObject playerArena = getPlayersArena(player);
         if(playerArena.getState() == ArenaGameState.WAITING) return;
         if(playerArena.getArt().getMinutes() < 5){
             int minElims = Collections.min(playerArena.getPlayerElims().values());

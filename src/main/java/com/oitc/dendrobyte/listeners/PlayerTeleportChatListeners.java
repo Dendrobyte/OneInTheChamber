@@ -6,6 +6,7 @@ import com.oitc.dendrobyte.ArenaObject;
 import com.oitc.dendrobyte.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +19,8 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.Set;
+
+import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 /**
  * Created by mobki, aka Dendrobyte, on 8/23/2019
@@ -46,13 +49,15 @@ public class PlayerTeleportChatListeners implements Listener {
         }
     }
 
-    // Handle players falling outside of the world, into the void
+    // Handle players falling outside of the world (void damage), drowning, and fire damage
     @EventHandler
     public void onPlayerTakeDamage(EntityDamageEvent event){
         if(event.getEntity().getType() != EntityType.PLAYER) return;
         Player player = (Player)event.getEntity();
         if(!am.isInGame(player)) return;
+        double health = player.getHealth();
         if(event.getCause() == EntityDamageEvent.DamageCause.VOID) {
+            event.setDamage(0);
             if(am.getKiller(player) != null){
                 am.eliminatePlayer(player, am.getKiller(player));
             } else {
@@ -69,9 +74,21 @@ public class PlayerTeleportChatListeners implements Listener {
         else if(event.getCause() == EntityDamageEvent.DamageCause.FALL){
             event.setCancelled(true);
         }
-        else if (event.getCause() == EntityDamageEvent.DamageCause.DROWNING){
-            String drownedDeath = ChatColor.GOLD + player.getName() + " decided to sleep with the fishes!";
-            am.eliminatePlayer(player, drownedDeath);
+        else if(event.getCause() == EntityDamageEvent.DamageCause.DROWNING){
+            if(health <= (player.getAttribute(GENERIC_MAX_HEALTH).getDefaultValue()) / 4) {
+                event.setCancelled(true);
+                String drownedDeath = ChatColor.GOLD + player.getName() + " decided to sleep with the fishes!";
+                player.sendMessage(ChatColor.RED + "Be careful! " + ChatColor.GRAY + "If drowning brings you below 25% health, you will be eliminated.");
+                am.eliminatePlayer(player, drownedDeath);
+            }
+        }
+        else if(event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK){
+            if(health <= (player.getAttribute(GENERIC_MAX_HEALTH).getDefaultValue()) / 4){
+                event.setCancelled(true);
+                String burnedDeath = ChatColor.GOLD + player.getName() + " has burned out!";
+                player.sendMessage(ChatColor.RED + "Be careful! " + ChatColor.GRAY + "If fire brings you below 25% health, you will be eliminated.");
+                am.eliminatePlayer(player, burnedDeath);
+            }
         }
     }
 
