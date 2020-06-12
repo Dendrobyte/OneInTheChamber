@@ -341,6 +341,10 @@ public class ArenaManager {
 
         player.sendMessage(prefix + ChatColor.RED + ChatColor.ITALIC + "Total Deaths: " + ChatColor.GRAY + deaths);
 
+
+        player.playSound(player.getLocation(), Sound.ENTITY_PIG_HURT, 1, 1);
+        shooter.playSound(shooter.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 5, 1);
+
         // If elims reaches 20 (or greater because that would totally be possible...) end the game
         if(elims >= killsToWin){
             endGame(getPlayersArena(player), shooter);

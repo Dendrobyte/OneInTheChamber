@@ -38,8 +38,6 @@ public class PlayerHitListener implements Listener {
             if(playerHealth <= damage){
                 event.setCancelled(true);
                 am.eliminatePlayer(player, damager);
-                player.playSound(player.getLocation(), Sound.ENTITY_PIG_HURT, 1, 1);
-                damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 5, 1);
             } else {
                 // If it's not enough to kill, store the hit
                 am.addHit(player, damager);
