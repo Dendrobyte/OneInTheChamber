@@ -11,6 +11,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -271,7 +272,7 @@ public class ArenaManager {
         for(Player playerInGame : tempPlayersInGame){
             if(playerInGame == null) continue;
             playerInGame.sendMessage(prefix + ChatColor.GOLD + ChatColor.BOLD + "GAME OVER!"
-                    + ChatColor.GRAY + " The winner, with " + killsToWin + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!"
+                    + ChatColor.GRAY + " The winner, with " + arena.getPlayerElims().get(winner) + " kills, is " + ChatColor.GREEN + ChatColor.ITALIC + winner.getName() + "!"
                     + ChatColor.GRAY + " The award for most deaths goes to " + ChatColor.RED + ChatColor.ITALIC + playerWithMostDeaths.getName() + "!");
 
             playerInGame.sendMessage(prefix + ChatColor.GRAY + "You had " + ChatColor.GREEN + arena.getPlayerElims().get(playerInGame) + " eliminations," +
@@ -303,6 +304,8 @@ public class ArenaManager {
     private void resetArenaSettings(ArenaObject arena){
         // Clear the arena fields
         arena.clearFields();
+        // Clear arrows
+        clearArrowsInArena(arena);
 
         // Set the state and update the signs
         arena.setState(ArenaGameState.WAITING);
@@ -506,5 +509,21 @@ public class ArenaManager {
 
     public Player getKiller(Player defender){
         return lastHits.get(defender);
+    }
+
+    private HashMap<ArenaObject, ArrayList<Arrow>> arrowsShotInGame = new HashMap<>();
+
+    public void addArrowToArrowsShot(ArenaObject arena, Arrow arrow){
+        if(!arrowsShotInGame.containsKey(arena)) {
+            arrowsShotInGame.put(arena, new ArrayList<>());
+        }
+        arrowsShotInGame.get(arena).add(arrow);
+    }
+
+    public void clearArrowsInArena(ArenaObject arena){
+        for(Arrow arr : arrowsShotInGame.get(arena)){
+            arr.remove();
+        }
+        arrowsShotInGame.remove(arena);
     }
 }

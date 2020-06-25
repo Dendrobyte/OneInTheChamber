@@ -4,13 +4,12 @@ import com.oitc.dendrobyte.ArenaManager;
 import com.oitc.dendrobyte.Main;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.*;
 
 /**
  * Created by mobki, aka Dendrobyte, on 8/23/2019
@@ -68,6 +67,16 @@ public class PlayerHitListener implements Listener {
         if(!am.isInGame(shooter)) return;
         if(event.getHitBlock() != null){
             arrow.remove();
+        }
+    }
+
+    @EventHandler
+    public void arrowHitsWater(EntityShootBowEvent event){
+        if(event.getEntityType() == EntityType.PLAYER){
+            Player player = (Player) event.getEntity();
+            if(am.isInGame(player)){
+                am.addArrowToArrowsShot(am.getPlayersArena(player), (Arrow)event.getProjectile());
+            }
         }
     }
 

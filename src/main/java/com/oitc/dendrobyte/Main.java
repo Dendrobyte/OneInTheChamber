@@ -48,6 +48,7 @@ public class Main extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportChatListeners(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new BlockPlaceBreakListener(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerLeaveListener(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayerInteractContainerListener(), this);
 
         // Register command
         getCommand("oitc").setExecutor(new BaseCommand());
