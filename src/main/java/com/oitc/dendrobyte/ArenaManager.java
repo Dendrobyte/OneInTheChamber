@@ -163,12 +163,16 @@ public class ArenaManager {
 
             // Tell everyone
             for(Player playerInGame : arena.getPlayers()){
+                playerInGame.sendMessage(prefix + ChatColor.GOLD + player.getName() + ChatColor.GRAY + " has joined the match.");
                 playerInGame.sendMessage(prefix + "2 players joined! Game starting in 60 seconds!");
             }
         }
 
         else if(currentPlayers == 3 || currentPlayers >= 5){
-            player.sendMessage(prefix + "There are " + ChatColor.DARK_PURPLE + arena.getAst().getSeconds() + ChatColor.GRAY + " seconds remaining.");
+            for(Player playerInGame : arena.getPlayers()){
+                playerInGame.sendMessage(prefix + ChatColor.GOLD + player.getName() + ChatColor.GRAY + " has joined the match.");
+                playerInGame.sendMessage(prefix + "There are " + ChatColor.DARK_PURPLE + arena.getAst().getSeconds() + ChatColor.GRAY + " seconds remaining.");
+            }
         }
 
         else if(currentPlayers == 4){
@@ -178,6 +182,7 @@ public class ArenaManager {
 
             // Tell everyone
             for(Player playerInGame : arena.getPlayers()){
+                playerInGame.sendMessage(prefix + ChatColor.GOLD + player.getName() + ChatColor.GRAY + " has joined the match.");
                 playerInGame.sendMessage(prefix + "4 players joined! Game starting in 15 seconds!");
             }
         }

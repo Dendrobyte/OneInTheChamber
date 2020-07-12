@@ -82,7 +82,8 @@ public class PlayerTeleportChatListeners implements Listener {
                 am.eliminatePlayer(player, drownedDeath);
             }
         }
-        else if(event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || event.getCause() == EntityDamageEvent.DamageCause.LAVA){
+        else if(event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK ||
+                event.getCause() == EntityDamageEvent.DamageCause.LAVA || event.getCause() == EntityDamageEvent.DamageCause.HOT_FLOOR){
             if(health <= (player.getAttribute(GENERIC_MAX_HEALTH).getDefaultValue()) / 4){
                 event.setCancelled(true);
                 String burnedDeath = ChatColor.GOLD + player.getName() + " has burned out!";
